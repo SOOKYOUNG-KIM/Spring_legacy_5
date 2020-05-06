@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.hani.s5.qna.QnaDAO">
+  
+  	<sql id = "search">
+  		where
+  	  		<choose>
+  			<when test="kind == 'bt'">
+  				Title
+  			</when>
+  			<when test="kind == 'bw'">
+  				Writer
+  			</when>
+  			<otherwise>
+  				Contents
+  			</otherwise>
+    		
+  		</choose> 
+  		like '%'||#{search}||'%'
+  	</sql>
+  	
+  	
+  
+   <!-- Count -->
+    <select id="boardCount" resultType="Long" parameterType="Pager">
+  		select count(num) from qna
+  		<include refid="search"></include>
+  	</select>
+  	
+  	<!-- List -->
+	<select id="boardList" parameterType="Pager" resultType="QnaVO">
+		select * from
+		(select Q.*, rownum R from
+		(select * from qna 
+		<include refid="search"></include>
+		order by ref desc, step asc) Q)
+		where R between #{startRow} and #{lastRow}
+	
+	</select>
+  	
+  	<!-- 답글쓰기(update)  -->
+  	<update id="boardReplyUpdate" parameterType="QnaVO">
+  		update qna set 
+  		step = step+1
+  		where ref = (select ref from qna where num = #{num}) and
+  			step > (select step from qna where num = #{num})
+  	
+  	</update>
+  	
+  	<!-- 답글쓰기(insert)  -->
+  	<insert id="boardReply" parameterType="QnaVO">
+  		insert into qna values(#{num},#{title},#{writer},#{contents},SYSDATE,0,
+  		(select ref from qna where num = #{num}),		<!-- 부모의 ref값 가져오기 -->
+  		(select step from qna where num = #{num})+1,	<!-- 부모의 step값 가져오기 -->
+  		(select depth from qna where num = #{num})+1)	<!-- 부모의 depth값 가져오기 -->
+
+  	</insert>
+  	
+	
+  	
+  	<!-- Insert -->
+  	<insert id="boardWrite" parameterType="QnaVO">
+  		<selectKey keyProperty="num" order="BEFORE" resultType="Long">
+  			select board_seq.nextval from dual
+  		</selectKey>
+  		insert into qna values(
+  		#{num},
+  		#{title},
+  		#{writer},
+  		#{contents},
+  		SYSDATE,
+  		0,
+  		#{num},
+  		0,
+  		0)
+  	</insert> 
+
+  	<!-- select문은 리턴값이 그때마다 다르기 때문에 resultType 선언해줌 -->
+  	<select id="boardSelect" parameterType="Long" resultType="QnaVO">
+  		select * from qna where num = #{num}
+  	</select>
+  	
+  	<delete id="boardDelete" parameterType="Long">
+  		delete qna where num = #{num}
+  	</delete>	
+  	
+  	<update id="boardUpdate" parameterType="QnaVO">
+  		update qna set title=#{title} , contents=#{contents} where num=#{num}
+  	</update>
+  	
+  	<update id="hitUpdate" parameterType="Long">
+  		update qna set hit=hit+1 where num=#{num}
+  	</update>
+
+  
+  
+  </mapper>

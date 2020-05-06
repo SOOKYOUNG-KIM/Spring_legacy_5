@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.hani.s5.notice.NoticeDAO">
+  
+  	<resultMap type="NoticeVO" id="selectResult">
+  		<id column="num" property="num"/>
+  		<result column="title" property="title"/>
+  		<result column="writer" property="writer"/>
+  		<result column="contents" property="contents"/>
+  		<result column="regDate" property="regDate"/>
+  		<result column="hit" property="hit"/>
+  		<collection property="boardFileVOs" javaType="List" ofType="BoardfileVO">
+  			<id column="fileNum" property="fileNum"/>
+  			<result column="fileName" property="fileName"/>
+  			<result column="oriName" property="oriName"/>
+  			<result column="board" property="board"/>
+  		</collection>
+  		
+  	
+  	</resultMap>
+  	
+  
+  	<sql id="search">
+  		like '%'||#{search}||'%'
+  	</sql>
+  
+  
+  	<!-- 전체 글의 갯수 가져오는 쿼리문 -->
+  	<select id="boardCount" resultType="Long" parameterType="Pager">
+  		select count(num) from notice
+  		<where>
+  			<if test="kind == 'bw'">
+  				Writer <include refid="search"></include>
+  			</if>
+  			
+  			<if test="kind == 'bt'">
+  				Title <include refid="search"></include>
+  			</if>
+  			
+  			<if test="kind == 'bc'">
+  				Contents <include refid="search"></include>	 
+  			</if>
+	
+  		</where>		
+  		
+  	</select>
+  	
+  	
+  	<!-- 파라미터명=DB컬럼명=VO변수명 -->
+  	
+  	<select id="boardList" resultType="NoticeVO" parameterType="Pager">
+  		select * from
+			(select N.* , rownum R from 
+			(select * from notice where 
+			
+			<choose>
+				<when test="kind == 'bc'">
+					Contents
+				</when>
+				
+				<when test="kind == 'bt'">
+					Title
+				</when>
+				
+				<otherwise>
+					Writer
+				</otherwise>
+		
+			</choose>
+			
+			<include refid="search"></include> and
+			 num>=1	order by num desc) N) 
+		where R BETWEEN #{startRow} and #{lastRow}
+  	</select>
+  	
+  	
+  	<!-- select문은 리턴값이 그때마다 다르기 때문에 resultType 선언해줌 -->
+  	<select id="boardSelect" parameterType="Long" resultMap="selectResult">
+	  	select N.*, F.*
+		from notice N left join boardFile F 
+		on (N.num = F.num)
+		where N.num = #{num}
+  		
+  	</select>
+  
+  	<select id="boardNum" resultType="Long">
+  		select board_seq.nextval from dual
+  	</select>
+  	
+  	<insert id="boardWrite" parameterType="NoticeVO">
+  		insert into notice values(#{num},#{title},#{writer},#{contents},SYSDATE,0)
+  	</insert> 
+  	
+  	<delete id="boardDelete" parameterType="Long">
+  		delete notice where num = #{num}
+  	</delete>	
+  	
+  	<update id="boardUpdate" parameterType="NoticeVO">
+  		update notice set title=#{title} , contents=#{contents} where num=#{num}
+  	</update>
+  	
+  	<update id="hitUpdate" parameterType="Long">
+  		update notice set hit=hit+1 where num=#{num}
+  	</update>
+  	       
+	
+  </mapper>
