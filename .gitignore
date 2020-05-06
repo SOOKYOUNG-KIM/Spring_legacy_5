@@ -23,3 +23,5 @@
 hs_err_pid*
 src/main/resources/DB/config/db.﻿properties
 target/classes/DB/config/db.﻿properties
+src/main/resources/DB/config/db.﻿properties
+target/classes/DB/config/db.﻿properties
