@@ -5,17 +5,16 @@
 	
 	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" id="propertyPlaceholderConfigurer">
 		<property name="locations" value="classpath:DB/config/*.properties"></property>
-		
 	</bean>
 	
 	<!-- Root Context: defines shared resources visible to all other web components -->
-	<!-- DB 연결 -->
 	<bean class="org.springframework.jdbc.datasource.DriverManagerDataSource" id="dataSource">
 		<property name="username" value="${oracle.user}" />
 		<property name="password" value="${oracle.pw}" />
 		<property name="url" value="${oracle.url}" />
 		<property name="driverClassName" value="${oracle.driver}" />
 	</bean>
+	
 	<!-- Mybatis 연결 -->
 	<bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
