@@ -23,7 +23,7 @@ public class HomeController {
 	 * Simply selects the home view to render by returning its name.
 	 */
 	
-	@Value("${oracle.user2}")
+	@Value("${oracle.user}")
 	private String user;
 	
 	
