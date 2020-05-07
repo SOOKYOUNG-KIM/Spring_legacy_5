@@ -28,6 +28,7 @@ public class NoticeService implements BoardService {
 	private FileSaver fileSaver;
 	@Autowired
 	private ServletContext servletContext;
+	
 	private HttpSession session;
 	@Autowired
 	private BoardFileDAO boardFileDAO;
