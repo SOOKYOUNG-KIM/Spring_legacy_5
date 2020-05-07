@@ -23,13 +23,10 @@ public class HomeController {
 	 * Simply selects the home view to render by returning its name.
 	 */
 	
-	@Value("${oracle.user2}")
-	private String user;
-	
+
 	
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String home(Locale locale, Model model) {
-		System.out.println(user);	
 		
 		return "index";
 	}
